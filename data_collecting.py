@@ -21,7 +21,7 @@ def convert_request_data_to_dict(data, url):
 
 
 def get_candles(url):
-    r = requests.get(url)
+    r = requests.get(url, timeout=(3, 10))
     data = r.json().get('data', [])
     candles = []
     for jdata in data:
@@ -36,7 +36,7 @@ def convert_to_timestamp(datetime_str):
 
 
 def get_okx_server_time():
-    r = requests.get("https://www.okx.com/api/v5/public/time")
+    r = requests.get("https://www.okx.com/api/v5/public/time", timeout=(3, 10))
     return int(r.json()['data'][0]['ts'])
 
 
@@ -84,5 +84,5 @@ def fetch_n_candles(asset, bar, n):
         # oldest candle
         oldest = cc[-1]['timestamp']
         after = int(oldest.timestamp() * 1000)
-        time.sleep(0.1) # for test mb can optimize okx allows 20req/2sec
     return res
+# mb i should not fetch all candles and use okx limit for batches? think about it later
