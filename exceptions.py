@@ -1,4 +1,4 @@
-class ValidationError:
+class ValidationError(BaseException):
     """Base class for validation errors."""
 
 class SchemaValidationError(ValidationError):

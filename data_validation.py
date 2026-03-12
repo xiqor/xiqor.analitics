@@ -12,8 +12,8 @@ def validate_schema(candles: list[dict]):
     required_columns = {'asset', 'interval', 'timestamp', 'open', 'high', 'low', 'close', 'volume'}
     for candle in candles:
         try:
-            set(candles.keys()).issubset(required_columns) and set(required_columns).issubset(candle.keys())
-        except SchemaValidationError(ValidationError) as e:
+            set(candle.keys()).issubset(required_columns) and set(required_columns).issubset(candle.keys())
+        except SchemaValidationError as e:
             raise e('Unexpected candle schema')
 
 def validate_types(candles: list[Candle]):
@@ -37,5 +37,5 @@ def validate_price_logic(candles: list[Candle]):
              (candle.low <= candle.close <= candle.high) and
              (candle.low <= candle.high) and
              (candle.volume >= 0))
-        except PriceLogicValidationError(ValidationError) as e:
+        except PriceLogicValidationError as e:
             raise e('Invalid candle price logic')
