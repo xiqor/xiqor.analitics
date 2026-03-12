@@ -1,5 +1,6 @@
 from exceptions import *
 from models import Candle
+from datetime import datetime
 
 def validate_not_empty(candles: list[dict]):
     try:
@@ -16,7 +17,18 @@ def validate_schema(candles: list[dict]):
             raise e('Unexpected candle schema')
 
 def validate_types(candles: list[Candle]):
-    pass
+    for candle in candles:
+        try:
+            ((isinstance(candle.asset, str)) and
+             (isinstance(candle.interval, str)) and
+             (isinstance(candle.timestamp, datetime)) and
+             (isinstance(candle.open, float)) and
+             (isinstance(candle.high, float)) and
+             (isinstance(candle.low, float)) and
+             (isinstance(candle.close, float)) and
+             (isinstance(candle.volume, float)))
+        except TypeValidationError as e:
+            raise e('Invalid type for candle field')
 
 def validate_price_logic(candles: list[Candle]):
     for candle in candles:
@@ -26,4 +38,4 @@ def validate_price_logic(candles: list[Candle]):
              (candle.low <= candle.high) and
              (candle.volume >= 0))
         except PriceLogicValidationError(ValidationError) as e:
-            raise e('Price logic error')
+            raise e('Invalid candle price logic')
