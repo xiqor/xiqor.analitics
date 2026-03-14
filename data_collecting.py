@@ -5,7 +5,18 @@ from urllib.parse import parse_qs
 import time
 
 
-def convert_request_data_to_dict(data, url):
+"""UTILITY FUNCTIONS"""
+
+
+def get_okx_server_time() -> int:
+    r = requests.get("https://www.okx.com/api/v5/public/time", timeout=(3, 10))
+    return int(r.json()['data'][0]['ts'])
+
+
+"""DATA COLLECTING FUNCTIONS"""
+
+
+def convert_request_data_to_dict(data: list[dict], url: str) -> dict:
     parsed = requests.utils.urlparse(url)
     query_params = parse_qs(parsed.query)
     asset, interval = query_params.get('instId', [None])[0], query_params.get('bar', [None])[0]
@@ -20,7 +31,7 @@ def convert_request_data_to_dict(data, url):
     return res_dict
 
 
-def get_candles(url):
+def get_candles(url: str) -> list[dict]:
     r = requests.get(url, timeout=(3, 10))
     data = r.json().get('data', [])
     candles = []
@@ -30,54 +41,22 @@ def get_candles(url):
     return candles
 
 
-def convert_to_timestamp(datetime_str):
-    res = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S").timestamp() * 1000
-    return res
-
-
-def get_okx_server_time():
-    r = requests.get("https://www.okx.com/api/v5/public/time", timeout=(3, 10))
-    return int(r.json()['data'][0]['ts'])
-
-
-def convert_dt_for_interval(dt, interval): # currently up to 4H, >= 1d doesnt work
-    # '2020-01-12 17:48:39', '15m'
-    # returns -> '2020-01-12 17:45:00'
-    # how?
-    # mb like this?
-    # you can use s, m, H
-    d, t = dt[:10], dt[11:]
-    trim_value, trim_dim = int(interval[:-1]), interval[-1]
-    match trim_dim:
-        case 's':
-           new_s = str((int(t[-2:]) // trim_value) * trim_value)
-           t = t[:-2] + new_s
-        case 'm':
-            new_m = str((int(t[-5:-3]) // trim_value) * trim_value)
-            t = t[:-5] + new_m + ':00'
-        case 'H':
-            new_H = str((int(t[-8:-6]) // trim_value) * trim_value)
-            t = t[:-8] + new_H + ':00:00'
-    new_dt = d + ' ' + t
-    return new_dt
-
-
-def fetch_candles(asset, bar, limit, after=None):
+def fetch_candles(asset: str, interval: str, limit: int, after: int = None) -> list[dict]:
     base_url = "https://www.okx.com/api/v5/market/history-candles"
     if after is None:
-        url = f"{base_url}?instId={asset}&bar={bar}&limit={limit}"
+        url = f"{base_url}?instId={asset}&bar={interval}&limit={limit}"
     else:
-        url = f"{base_url}?instId={asset}&after={after}&bar={bar}&limit={limit}"
+        url = f"{base_url}?instId={asset}&after={after}&bar={interval}&limit={limit}"
     return get_candles(url)
 
 
-def fetch_n_candles(asset, bar, n):
+def fetch_n_candles(asset: str, interval: str, n: int) -> list[dict]:
     res = []
     batch_limit = 300
     after = None
     while len(res) < n:
         limit = min(batch_limit, n - len(res))
-        cc = fetch_candles(asset, bar, limit=limit, after=after)
+        cc = fetch_candles(asset, interval, limit=limit, after=after)
         if not cc:
             break
         res.extend(cc)

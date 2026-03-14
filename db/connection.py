@@ -4,7 +4,7 @@ import psycopg2
 
 load_dotenv() # later move it to main or app.py
 
-def get_connection():
+def get_connection() -> psycopg2.extensions.connection:
     # try:
         connection = psycopg2.connect(
             dbname = os.getenv('DB_NAME'),

@@ -4,7 +4,7 @@ from db.connection import get_connection
 
 # next step: add increment loading (from the last ts to current), batch insert, clean architecture
 
-def insert_candles(conn, candles: list[Candle]) -> None:
+def insert_candles(conn: psycopg2.extensions.connection, candles: list[Candle]) -> None:
     cursor = conn.cursor()
     for candle in candles:
         cursor.execute('''INSERT INTO ohlcv_data (asset, interval, timestamp, open, high, low, close, volume)
