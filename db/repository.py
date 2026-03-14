@@ -1,8 +1,15 @@
 from models import Candle
 import psycopg2
 from db.connection import get_connection
-# не проверяй дубликаты здесь, медленно, лучше сделай unique в postgres и с помощью ON CONFLICT DO NOTHING пропускай дубликаты
+
+# next step: add increment loading (from the last ts to current), batch insert, clean architecture
 
 def insert_candles(conn, candles: list[Candle]) -> None:
     cursor = conn.cursor()
-    print(conn.get_dsn_parameters())
+    for candle in candles:
+        cursor.execute('''INSERT INTO ohlcv_data (asset, interval, timestamp, open, high, low, close, volume)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (asset, interval, timestamp) DO NOTHING''',
+            (candle.asset, candle.interval, candle.timestamp, candle.open, candle.high, candle.low, candle.close, candle.volume))
+    conn.commit()
+    cursor.close()

@@ -5,7 +5,7 @@ from db.connection import get_connection
 from db.repository import insert_candles
 import pandas as pd
 
-candles = fetch_n_candles('BTC-USDT', '4H', 300) # mb there's a way to make it just go brrr and get every candle to the first one
+candles = fetch_n_candles('BTC-USDT', '4H', 3) # mb there's a way to make it just go brrr and get every candle to the first one
 validate_not_empty(candles)
 validate_schema(candles)
 norm_candles = normalize_candles(candles)
@@ -17,3 +17,5 @@ print(norm_candles)
 connection = get_connection()
 
 insert_candles(connection, norm_candles)
+
+connection.close()
