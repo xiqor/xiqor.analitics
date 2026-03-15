@@ -16,7 +16,7 @@ print(norm_candles)
 
 connection = get_connection()
 
-insert_candles(connection, norm_candles)
+insert_candles(norm_candles, connection)
 print(get_last_timestamp('BTC-USDT', '4H', connection))
 
 connection.close()
